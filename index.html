@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAMAGE WATCH TECNICTIONS - The Future of Technology</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Three.js and p5.js Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+
+    <!-- Custom Styles & Tailwind Config -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Canvas for 3D model */
+        #watch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        /* Canvas for p5.js background */
+        #tech-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        /* Custom gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #a5b4fc, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Scroll reveal animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Custom glassmorphism effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-primary': '#3b82f6', // Vivid Blue
+                        'brand-secondary': '#0f172a', // Slate Dark Blue
+                        'brand-light': '#1e293b', // Lighter Slate
+                        'brand-text': '#94a3b8', // Slate Gray text
+                        'brand-heading': '#f1f5f9', // Almost White headings
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-secondary text-brand-text">
+
+    <!-- Header -->
+    <header class="bg-brand-secondary/70 backdrop-blur-lg fixed top-0 left-0 right-0 z-50 border-b border-slate-700/50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-2xl font-bold text-brand-heading">
+                GWT<span class="text-brand-primary">.</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#features" class="text-sm font-medium hover:text-brand-primary transition duration-300">Features</a>
+                <a href="#tech" class="text-sm font-medium hover:text-brand-primary transition duration-300">Technology</a>
+                <a href="#products" class="text-sm font-medium hover:text-brand-primary transition duration-300">Products</a>
+                <a href="#contact" class="text-sm font-medium hover:text-brand-primary transition duration-300">Contact Us</a>
+            </div>
+            <a href="#products" class="hidden md:block bg-brand-primary text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-500 transition duration-300">Explore Collection</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section with 3D Model -->
+        <section id="home" class="relative h-screen flex items-center justify-center text-center overflow-hidden">
+            <canvas id="watch-canvas"></canvas>
+            <div class="relative z-10 px-6">
+                <h1 class="text-5xl md:text-7xl font-extrabold mb-4 leading-tight text-brand-heading">
+                    The Future of <span class="gradient-text">Technology</span>
+                </h1>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-brand-text">The style that manages your life and time.</p>
+                <a href="#features" class="bg-brand-primary text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-500 transform hover:scale-105 transition-all duration-300">Learn More</a>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-24 bg-brand-secondary">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl font-bold mb-4 text-brand-heading reveal">Your Smartest Companion</h2>
+                <p class="max-w-2xl mx-auto mb-16 text-brand-text reveal">Health, efficiency, and connectivity, all in one place.</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 rounded-2xl reveal">
+                        <h3 class="text-xl font-bold mb-2 text-brand-heading">Precise Health Data</h3>
+                        <p class="text-brand-text">Accurately provides data like heart rate, blood oxygen level (SpO2), and sleep patterns.</p>
+                    </div>
+                    <div class="glass-card p-8 rounded-2xl reveal" style="transition-delay: 200ms;">
+                        <h3 class="text-xl font-bold mb-2 text-brand-heading">Sleek Finish</h3>
+                        <p class="text-brand-text">Crafted with Titanium and Sapphire Crystal, ensuring it's lightweight yet highly durable.</p>
+                    </div>
+                    <div class="glass-card p-8 rounded-2xl reveal" style="transition-delay: 400ms;">
+                        <h3 class="text-xl font-bold mb-2 text-brand-heading">Versatile Connectivity</h3>
+                        <p class="text-brand-text">Supports calls, messages, and notifications, while also facilitating NFC payments.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Technology Section with p5.js -->
+        <section id="tech" class="relative py-24 overflow-hidden">
+            <div id="tech-background"></div>
+            <div class="container mx-auto px-6 relative z-10 grid md:grid-cols-2 gap-16 items-center">
+                <div class="reveal">
+                    <h2 class="text-4xl font-bold mb-6 text-brand-heading">AI-Powered Chip</h2>
+                    <p class="text-brand-text mb-4">Our latest GWT-A1 chip delivers 2x faster performance and 50% more efficient power management than before.</p>
+                    <p class="text-brand-text">It analyzes your data to provide personalized health insights.</p>
+                </div>
+                <div class="h-80 w-full glass-card rounded-2xl reveal">
+                    <!-- Placeholder for a tech graphic or animation -->
+                    <div class="flex items-center justify-center h-full">
+                        <p class="text-brand-text">GWT-A1 Chip Visualization</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products" class="py-24 bg-brand-secondary">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl font-bold mb-4 text-brand-heading reveal">Our Collection</h2>
+                <p class="max-w-2xl mx-auto mb-16 text-brand-text reveal">Designed to fit every style and every need.</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Product Card 1 -->
+                    <div class="glass-card rounded-2xl p-8 flex flex-col items-center text-center group reveal">
+                        <div class="h-48 w-48 bg-slate-700 rounded-full mb-6 flex items-center justify-center group-hover:bg-brand-primary transition-colors duration-300">
+                           <span class="text-brand-heading">Model X</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-brand-heading mb-2">GWT Fusion X</h3>
+                        <p class="text-brand-text mb-4 flex-grow">For professionals and tech enthusiasts.</p>
+                        <p class="text-2xl font-bold text-brand-primary mb-6">$399</p>
+                        <a href="#" class="bg-slate-700 text-white w-full block py-3 rounded-full hover:bg-brand-primary transition duration-300">View Details</a>
+                    </div>
+                    <!-- Product Card 2 -->
+                    <div class="glass-card rounded-2xl p-8 flex flex-col items-center text-center group reveal" style="transition-delay: 200ms;">
+                        <div class="h-48 w-48 bg-slate-700 rounded-full mb-6 flex items-center justify-center group-hover:bg-brand-primary transition-colors duration-300">
+                           <span class="text-brand-heading">Model A</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-brand-heading mb-2">GWT Air</h3>
+                        <p class="text-brand-text mb-4 flex-grow">For daily use, with a simple and elegant look.</p>
+                        <p class="text-2xl font-bold text-brand-primary mb-6">$279</p>
+                        <a href="#" class="bg-slate-700 text-white w-full block py-3 rounded-full hover:bg-brand-primary transition duration-300">View Details</a>
+                    </div>
+                    <!-- Product Card 3 -->
+                    <div class="glass-card rounded-2xl p-8 flex flex-col items-center text-center group reveal" style="transition-delay: 400ms;">
+                        <div class="h-48 w-48 bg-slate-700 rounded-full mb-6 flex items-center justify-center group-hover:bg-brand-primary transition-colors duration-300">
+                           <span class="text-brand-heading">Model S</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-brand-heading mb-2">GWT Sport</h3>
+                        <p class="text-brand-text mb-4 flex-grow">Specialized for sports and workouts.</p>
+                        <p class="text-2xl font-bold text-brand-primary mb-6">$229</p>
+                        <a href="#" class="bg-slate-700 text-white w-full block py-3 rounded-full hover:bg-brand-primary transition duration-300">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-24 bg-brand-light">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl font-bold mb-4 text-brand-heading reveal">Get in Touch</h2>
+                <p class="max-w-2xl mx-auto mb-12 text-brand-text reveal">Contact us with your ideas, suggestions, or any inquiries.</p>
+                <div class="max-w-2xl mx-auto glass-card p-8 rounded-2xl reveal">
+                    <form id="contactForm">
+                        <div class="grid sm:grid-cols-2 gap-6 mb-6">
+                            <input type="text" id="name" placeholder="Your Name" class="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary" required>
+                            <input type="email" placeholder="Email Address" class="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary" required>
+                        </div>
+                        <textarea placeholder="Your Message..." rows="5" class="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary mb-6" required></textarea>
+                        <button type="submit" class="bg-brand-primary text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-500 transform hover:scale-105 transition-all duration-300">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-brand-secondary border-t border-slate-700/50">
+        <div class="container mx-auto px-6 py-8 text-center text-brand-text">
+            <p class="text-lg font-bold text-brand-heading mb-2">GAMAGE WATCH TECNICTIONS</p>
+            <div class="flex justify-center space-x-6 my-4">
+                <a href="#" class="hover:text-brand-primary">Facebook</a>
+                <a href="#" class="hover:text-brand-primary">Instagram</a>
+                <a href="#" class="hover:text-brand-primary">X (Twitter)</a>
+            </div>
+            <p class="text-sm">&copy; 2025 GAMAGE WATCH TECNICTIONS. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Three.js 3D Watch Model ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('watch-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // Watch Model (Placeholder Geometry)
+        const watchGroup = new THREE.Group();
+        const caseGeometry = new THREE.CylinderGeometry(1, 1, 0.3, 64);
+        const caseMaterial = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.2 });
+        const watchCase = new THREE.Mesh(caseGeometry, caseMaterial);
+        watchGroup.add(watchCase);
+        
+        const screenGeometry = new THREE.CircleGeometry(0.9, 64);
+        const screenMaterial = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+        const watchScreen = new THREE.Mesh(screenGeometry, screenMaterial);
+        watchScreen.position.z = 0.16;
+        watchGroup.add(watchScreen);
+
+        const strapGeometry = new THREE.TorusGeometry(1.5, 0.15, 16, 100);
+        const strapMaterial = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+        const strap = new THREE.Mesh(strapGeometry, strapMaterial);
+        strap.rotation.x = Math.PI / 2;
+        watchGroup.add(strap);
+        
+        scene.add(watchGroup);
+        camera.position.z = 5;
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            watchGroup.rotation.y += 0.005;
+            watchGroup.rotation.x += 0.001;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- p5.js Background Animation ---
+        let particles = [];
+        const p5Sketch = (p) => {
+            p.setup = () => {
+                let canvas = p.createCanvas(p.windowWidth, p.windowHeight);
+                canvas.parent('tech-background');
+                for(let i = 0; i < 100; i++){
+                    particles.push(new Particle(p));
+                }
+            };
+            p.draw = () => {
+                p.clear();
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                    particle.connect(particles, p);
+                });
+            };
+             p.windowResized = () => {
+                p.resizeCanvas(p.windowWidth, p.windowHeight);
+            };
+        };
+        new p5(p5Sketch);
+
+        class Particle {
+            constructor(p) {
+                this.p = p;
+                this.pos = p.createVector(p.random(p.width), p.random(p.height));
+                this.vel = p.createVector(p.random(-0.5, 0.5), p.random(-0.5, 0.5));
+                this.size = 2;
+            }
+            update() {
+                this.pos.add(this.vel);
+                if(this.pos.x < 0 || this.pos.x > this.p.width) this.vel.x *= -1;
+                if(this.pos.y < 0 || this.pos.y > this.p.height) this.vel.y *= -1;
+            }
+            draw() {
+                this.p.noStroke();
+                this.p.fill('rgba(59, 130, 246, 0.5)');
+                this.p.circle(this.pos.x, this.pos.y, this.size);
+            }
+            connect(particles, p){
+                particles.forEach(particle => {
+                    const d = p.dist(this.pos.x, this.pos.y, particle.pos.x, particle.pos.y);
+                    if(d < 120){
+                        p.stroke('rgba(59, 130, 246, 0.1)');
+                        p.line(this.pos.x, this.pos.y, particle.pos.x, particle.pos.y);
+                    }
+                });
+            }
+        }
+
+        // --- Scroll Reveal Animation ---
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 50;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal(); // Initial check
+        
+        // --- Contact Form Submission ---
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const name = document.getElementById('name').value;
+                alert(`Thank you, ${name}! We have received your message.`);
+                contactForm.reset();
+            });
+        }
+    </script>
+
+</body>
+</html>
