@@ -1,458 +1,357 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamage Watch Technicians - Precision & Style</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+import React, { useState, useEffect, useRef } from 'react';
+import * as THREE from 'three';
+import p5 from 'p5';
 
-    <!-- three.js & p5.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+// --- Helper: Icon Components ---
+const SearchIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 hover:text-white transition-colors"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+);
+const UserIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 hover:text-white transition-colors"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+);
+const CartIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 hover:text-white transition-colors"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+);
 
-    <style>
-        /* Custom styles for a polished look */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #e2e8f0;
-            overflow-x: hidden;
-        }
-        /* Style for the p5.js canvas to be a background */
-        #p5-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            width: 100vw;
-            height: 100vh;
-        }
-        /* Style for the three.js canvas */
-        #three-canvas {
-            width: 100%;
-            height: 100%;
-            cursor: grab;
-        }
-        #three-canvas:active {
-            cursor: grabbing;
-        }
-        /* Glassmorphism effect for cards and nav */
-        .glass-effect {
-            background: rgba(17, 25, 40, 0.75);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.125);
-        }
-        /* Custom gradient text */
-        .gradient-text {
-            background: linear-gradient(to right, #a78bfa, #f472b6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        /* Smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-        /* Custom button style */
-        .btn-primary {
-            @apply px-6 py-3 font-semibold text-white bg-indigo-600 rounded-lg shadow-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:scale-105;
-        }
-        .btn-secondary {
-            @apply px-6 py-3 font-semibold text-white bg-gray-700 rounded-lg shadow-lg hover:bg-gray-600 transition-all duration-300 ease-in-out transform hover:scale-105;
-        }
-    </style>
-</head>
-<body class="antialiased">
+// --- Reusable Components ---
+const GlassCard = ({ children, className = '' }) => (
+    <div className={`bg-white bg-opacity-5 backdrop-blur-lg border border-white border-opacity-10 rounded-2xl ${className}`}>
+        {children}
+    </div>
+);
 
-    <!-- P5.js Background Canvas -->
-    <div id="p5-canvas"></div>
-
-    <!-- Header -->
-    <header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
-        <nav class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between glass-effect rounded-xl p-4">
-                <a href="#" class="text-2xl font-bold tracking-wider">
-                    <span class="gradient-text">GAMAGE</span>
-                </a>
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#featured" class="hover:text-indigo-400 transition-colors">Featured</a>
-                    <a href="#craftsmanship" class="hover:text-indigo-400 transition-colors">Craftsmanship</a>
-                    <a href="#studio" class="hover:text-indigo-400 transition-colors">Studio</a>
-                    <a href="#contact" class="hover:text-indigo-400 transition-colors">Contact</a>
-                </div>
-                <button class="md:hidden text-white focus:outline-none" id="mobile-menu-button">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
+const ProductCard = ({ imageUrl, title, price, delay = 0 }) => (
+    <div className="reveal-up group" data-sr-delay={delay}>
+        <GlassCard className="p-4 overflow-hidden transition-transform transform hover:-translate-y-2 duration-300">
+            <div className="mb-4 overflow-hidden rounded-xl">
+                <img src={imageUrl} alt={title} className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" />
             </div>
-        </nav>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden glass-effect mx-6 rounded-b-xl">
-            <a href="#featured" class="block py-2 px-4 text-sm hover:bg-gray-700">Featured</a>
-            <a href="#craftsmanship" class="block py-2 px-4 text-sm hover:bg-gray-700">Craftsmanship</a>
-            <a href="#studio" class="block py-2 px-4 text-sm hover:bg-gray-700">Studio</a>
-            <a href="#contact" class="block py-2 px-4 text-sm hover:bg-gray-700">Contact</a>
-        </div>
-    </header>
+            <h3 className="text-xl font-bold text-white mb-1">{title}</h3>
+            <p className="text-lg text-gray-300">{price}</p>
+        </GlassCard>
+    </div>
+);
 
-    <!-- Main Content -->
-    <main>
-        <!-- Hero Section -->
-        <section id="hero" class="h-screen flex items-center justify-center relative">
-            <div class="container mx-auto px-6 flex flex-col lg:flex-row items-center">
-                <!-- Left Text Content -->
-                <div class="lg:w-1/2 text-center lg:text-left mb-10 lg:mb-0">
-                    <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
-                        Where <span class="gradient-text">Timeless</span> Design<br>Meets Modern Mastery.
-                    </h1>
-                    <p class="text-lg md:text-xl text-slate-300 mb-8 max-w-xl mx-auto lg:mx-0">
-                        Discover meticulously crafted timepieces that blend tradition with cutting-edge technology. Each watch is a statement of precision and elegance.
-                    </p>
-                    <div class="flex justify-center lg:justify-start space-x-4">
-                        <a href="#featured" class="btn-primary">Explore Collection</a>
-                        <a href="#studio" class="btn-secondary">Customize Yours</a>
-                    </div>
-                </div>
-                <!-- Right 3D Model -->
-                <div id="three-canvas-container" class="lg:w-1/2 h-[50vh] lg:h-[70vh] w-full">
-                    <div id="three-canvas"></div>
-                    <p class="text-center text-xs text-slate-500 mt-2">Drag to rotate the watch</p>
-                </div>
-            </div>
-        </section>
+const SectionTitle = ({ children }) => (
+    <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 text-shadow-md" style={{textShadow: '0 0 15px rgba(255, 255, 255, 0.2)'}}>
+        {children}
+    </h2>
+);
 
-        <!-- Featured Watches Section -->
-        <section id="featured" class="py-20">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold">Featured Timepieces</h2>
-                    <p class="text-slate-400 mt-2">Handpicked for their exceptional design and performance.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Watch Card 1 -->
-                    <div class="glass-effect rounded-xl p-6 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300">
-                        <div class="w-48 h-48 bg-gray-800 rounded-full mb-4 flex items-center justify-center font-bold text-slate-500">3D Model Placeholder</div>
-                        <h3 class="text-xl font-bold mb-2">The Chronos Mk. III</h3>
-                        <p class="text-slate-400 mb-4 text-sm">A bold statement of engineering prowess, featuring a triple-dial chronograph and a titanium case.</p>
-                        <span class="text-lg font-semibold gradient-text">$2,499</span>
-                    </div>
-                    <!-- Watch Card 2 -->
-                    <div class="glass-effect rounded-xl p-6 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300">
-                        <div class="w-48 h-48 bg-gray-800 rounded-full mb-4 flex items-center justify-center font-bold text-slate-500">3D Model Placeholder</div>
-                        <h3 class="text-xl font-bold mb-2">The Aetherium</h3>
-                        <p class="text-slate-400 mb-4 text-sm">Minimalist elegance with a sapphire crystal face and an automatic, self-winding movement.</p>
-                        <span class="text-lg font-semibold gradient-text">$1,850</span>
-                    </div>
-                    <!-- Watch Card 3 -->
-                    <div class="glass-effect rounded-xl p-6 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300">
-                        <div class="w-48 h-48 bg-gray-800 rounded-full mb-4 flex items-center justify-center font-bold text-slate-500">3D Model Placeholder</div>
-                        <h3 class="text-xl font-bold mb-2">The Voyager GMT</h3>
-                        <p class="text-slate-400 mb-4 text-sm">For the world traveler. Track two time zones simultaneously with this robust and reliable companion.</p>
-                        <span class="text-lg font-semibold gradient-text">$3,200</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+// --- Page Components ---
 
-        <!-- Craftsmanship Section -->
-        <section id="craftsmanship" class="py-20 bg-black bg-opacity-20">
-            <div class="container mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
-                <div class="lg:w-1/2">
-                    <div class="glass-effect rounded-xl p-8">
-                        <h2 class="text-3xl md:text-4xl font-bold mb-4">The Art of Horology</h2>
-                        <p class="text-slate-300 mb-4">
-                            Our watches are more than just time-tellers; they are a legacy of craftsmanship passed down through generations. We combine traditional techniques with state-of-the-art materials to create timepieces of unparalleled quality.
-                        </p>
-                        <ul class="space-y-3 text-slate-300">
-                            <li class="flex items-center"><span class="text-indigo-400 mr-3">✓</span> Swiss Automatic Movements</li>
-                            <li class="flex items-center"><span class="text-indigo-400 mr-3">✓</span> Sapphire Crystal Glass</li>
-                            <li class="flex items-center"><span class="text-indigo-400 mr-3">✓</span> 316L Surgical Grade Steel</li>
-                            <li class="flex items-center"><span class="text-indigo-400 mr-3">✓</span> Hand-Assembled & Inspected</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="lg:w-1/2 h-96 bg-gray-800 rounded-xl flex items-center justify-center">
-                    <p class="text-slate-500 font-semibold">Interactive exploded view coming soon</p>
-                </div>
-            </div>
-        </section>
+// --- P5.js Background Component ---
+const P5Background = () => {
+    const p5ContainerRef = useRef();
 
-        <!-- Customization Studio Section -->
-        <section id="studio" class="py-20">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-3xl md:text-4xl font-bold">Customization Studio</h2>
-                <p class="text-slate-400 mt-2 mb-8 max-w-2xl mx-auto">Become the designer. Create a watch that is uniquely yours by choosing the case, dial, hands, and strap.</p>
-                <div class="glass-effect rounded-xl p-8 md:p-12 max-w-4xl mx-auto">
-                    <div class="flex flex-col md:flex-row items-center gap-8">
-                        <div class="w-full md:w-1/2 h-80 bg-gray-800 rounded-lg flex items-center justify-center">
-                           <p class="text-slate-500 font-semibold">Live 3D Customizer Placeholder</p>
-                        </div>
-                        <div class="w-full md:w-1/2 text-left">
-                            <div class="mb-4">
-                                <label class="font-bold">Case Finish:</label>
-                                <div class="flex space-x-2 mt-2">
-                                    <button class="w-10 h-10 rounded-full bg-gray-300 border-2 border-indigo-400"></button>
-                                    <button class="w-10 h-10 rounded-full bg-gray-900 border-2 border-transparent hover:border-indigo-400"></button>
-                                    <button class="w-10 h-10 rounded-full bg-yellow-500 border-2 border-transparent hover:border-indigo-400"></button>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <label class="font-bold">Dial Color:</label>
-                                <div class="flex space-x-2 mt-2">
-                                    <button class="w-10 h-10 rounded-full bg-blue-900 border-2 border-transparent hover:border-indigo-400"></button>
-                                    <button class="w-10 h-10 rounded-full bg-white border-2 border-indigo-400"></button>
-                                    <button class="w-10 h-10 rounded-full bg-green-800 border-2 border-transparent hover:border-indigo-400"></button>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="font-bold">Strap Material:</label>
-                                <div class="flex space-x-2 mt-2">
-                                    <button class="px-4 py-2 rounded-lg bg-gray-700 text-sm hover:bg-indigo-600">Leather</button>
-                                    <button class="px-4 py-2 rounded-lg bg-gray-900 text-sm hover:bg-indigo-600">Metal</button>
-                                    <button class="px-4 py-2 rounded-lg bg-gray-700 text-sm hover:bg-indigo-600">Nylon</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn-primary mt-8">Finalize & Inquire</button>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer id="contact" class="bg-black bg-opacity-40 pt-12">
-        <div class="container mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="md:col-span-1">
-                    <h3 class="text-xl font-bold mb-2"><span class="gradient-text">GAMAGE</span></h3>
-                    <p class="text-slate-400 text-sm">Crafting the future of time.</p>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-3">Company</h4>
-                    <ul class="space-y-2 text-sm text-slate-400">
-                        <li><a href="#" class="hover:text-white">About Us</a></li>
-                        <li><a href="#" class="hover:text-white">Our Heritage</a></li>
-                        <li><a href="#" class="hover:text-white">Careers</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-3">Support</h4>
-                    <ul class="space-y-2 text-sm text-slate-400">
-                        <li><a href="#" class="hover:text-white">Contact</a></li>
-                        <li><a href="#" class="hover:text-white">FAQ</a></li>
-                        <li><a href="#" class="hover:text-white">Warranty</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-3">Connect</h4>
-                     <div class="flex space-x-4">
-                        <a href="#" class="text-slate-400 hover:text-white">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>
-                        </a>
-                        <a href="#" class="text-slate-400 hover:text-white">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
-                        </a>
-                         <a href="#" class="text-slate-400 hover:text-white">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.098 3.7c.636-.247 1.363-.416 2.427-.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0-2a7 7 0 110 14 7 7 0 010-14zm6.406-2.186a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4z" clip-rule="evenodd" /></svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-8 border-t border-gray-800 pt-6 pb-8 text-center text-sm text-slate-500">
-                <p>&copy; 2024 Gamage Watch Technicians. All Rights Reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // --- Mobile Menu Toggle ---
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        // --- Header Scroll Effect ---
-        const header = document.getElementById('header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('glass-effect', 'shadow-lg');
-            } else {
-                header.classList.remove('glass-effect', 'shadow-lg');
-            }
-        });
-
-        // --- p5.js Background Animation ---
-        function setupP5(p) {
+    useEffect(() => {
+        const sketch = (p) => {
             let particles = [];
-            
-            p.setup = function() {
-                const canvas = p.createCanvas(p.windowWidth, p.windowHeight);
-                canvas.parent('p5-canvas');
-                for (let i = 0; i < 100; i++) {
-                    particles.push(new Particle(p));
+            const numParticles = 50;
+
+            class Particle {
+                constructor() {
+                    this.pos = p.createVector(p.random(p.width), p.random(p.height));
+                    this.vel = p.createVector(p.random(-0.3, 0.3), p.random(-0.3, 0.3));
+                    this.size = p.random(1, 3);
+                    this.color = p.color(255, 255, 255, p.random(50, 150));
+                }
+                update() {
+                    this.pos.add(this.vel);
+                    if (this.pos.x < 0 || this.pos.x > p.width) this.vel.x *= -1;
+                    if (this.pos.y < 0 || this.pos.y > p.height) this.vel.y *= -1;
+                }
+                draw() {
+                    p.noStroke();
+                    p.fill(this.color);
+                    p.circle(this.pos.x, this.pos.y, this.size);
+                }
+            }
+
+            p.setup = () => {
+                p.createCanvas(p.windowWidth, p.windowHeight).parent(p5ContainerRef.current);
+                for (let i = 0; i < numParticles; i++) {
+                    particles.push(new Particle());
                 }
             };
 
-            p.draw = function() {
-                p.clear(); // Use clear for a transparent background
+            p.draw = () => {
+                p.clear();
                 particles.forEach(particle => {
                     particle.update();
                     particle.draw();
-                    particle.checkEdges();
                 });
             };
-            
-            p.windowResized = function() {
+
+            p.windowResized = () => {
                 p.resizeCanvas(p.windowWidth, p.windowHeight);
-            }
+            };
+        };
 
-            class Particle {
-                constructor(p) {
-                    this.p = p;
-                    this.pos = this.p.createVector(this.p.random(this.p.width), this.p.random(this.p.height));
-                    this.vel = this.p.createVector(this.p.random(-0.3, 0.3), this.p.random(-0.3, 0.3));
-                    this.size = this.p.random(1, 3);
-                }
+        let p5Instance = new p5(sketch);
+        return () => {
+            p5Instance.remove();
+        };
+    }, []);
 
-                update() {
-                    this.pos.add(this.vel);
-                }
-
-                draw() {
-                    this.p.noStroke();
-                    this.p.fill('rgba(167, 139, 250, 0.5)'); // Corresponds to Tailwind's indigo-400
-                    this.p.circle(this.pos.x, this.pos.y, this.size);
-                }
-
-                checkEdges() {
-                    if (this.pos.x < 0 || this.pos.x > this.p.width || this.pos.y < 0 || this.pos.y > this.p.height) {
-                        this.pos.x = this.p.random(this.p.width);
-                        this.pos.y = this.p.random(this.p.height);
-                    }
-                }
-            }
-        }
-        new p5(setupP5);
+    return <div ref={p5ContainerRef} className="fixed top-0 left-0 w-full h-screen -z-10" />;
+};
 
 
-        // --- three.js 3D Watch Model ---
-        function initThreeJS() {
-            const container = document.getElementById('three-canvas');
-            if (!container) return;
+// --- Three.js Hero Component ---
+const HeroThreeJS = () => {
+    const mountRef = useRef(null);
 
-            // Scene, Camera, Renderer
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.z = 5;
+    useEffect(() => {
+        const currentMount = mountRef.current;
+        let scene, camera, renderer, watchGroup;
 
-            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            container.appendChild(renderer.domElement);
+        const init = () => {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+            currentMount.appendChild(renderer.domElement);
 
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
             directionalLight.position.set(5, 10, 7.5);
             scene.add(directionalLight);
 
-            // Watch Group
-            const watchGroup = new THREE.Group();
-            scene.add(watchGroup);
-
-            // Watch Body (Case)
-            const caseGeometry = new THREE.CylinderGeometry(1.5, 1.5, 0.5, 64);
-            const caseMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.2 });
+            watchGroup = new THREE.Group();
+            const caseMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.9, roughness: 0.2 });
+            const faceMaterial = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1 });
+            
+            const caseGeometry = new THREE.CylinderGeometry(1, 1, 0.3, 64);
             const watchCase = new THREE.Mesh(caseGeometry, caseMaterial);
             watchGroup.add(watchCase);
 
-            // Watch Face
-            const faceGeometry = new THREE.CircleGeometry(1.4, 64);
-            const faceMaterial = new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 0.1, roughness: 0.5 });
+            const faceGeometry = new THREE.CylinderGeometry(0.95, 0.95, 0.02, 64);
             const watchFace = new THREE.Mesh(faceGeometry, faceMaterial);
-            watchFace.position.z = 0.251;
+            watchFace.position.y = 0.16;
             watchGroup.add(watchFace);
-            
-            // Hour markers
-            for (let i = 0; i < 12; i++) {
-                const markerGeometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);
-                const markerMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9, roughness: 0.1 });
-                const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-                const angle = (i / 12) * Math.PI * 2;
-                marker.position.set(Math.sin(angle) * 1.2, Math.cos(angle) * 1.2, 0.26);
-                marker.rotation.z = -angle;
-                watchGroup.add(marker);
-            }
 
-            // Hands
-            const handMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1.0, roughness: 0.1 });
-            // Hour hand
-            const hourHandGeometry = new THREE.BoxGeometry(0.05, 0.7, 0.05);
-            const hourHand = new THREE.Mesh(hourHandGeometry, handMaterial);
-            hourHand.position.z = 0.3;
-            hourHand.position.y = 0.35;
-            watchGroup.add(hourHand);
-            // Minute hand
-            const minuteHandGeometry = new THREE.BoxGeometry(0.03, 1.1, 0.05);
-            const minuteHand = new THREE.Mesh(minuteHandGeometry, handMaterial);
-            minuteHand.position.z = 0.3;
-            minuteHand.position.y = 0.55;
-            watchGroup.add(minuteHand);
-            
+            scene.add(watchGroup);
+            camera.position.z = 3;
             watchGroup.rotation.x = 0.5;
+            watchGroup.rotation.y = -0.5;
+        };
 
-            // Mouse interaction
-            let isMouseDown = false;
-            let previousMousePosition = { x: 0, y: 0 };
+        let mouseX = 0, mouseY = 0;
+        const onMouseMove = (event) => {
+            mouseX = (event.clientX - window.innerWidth / 2);
+            mouseY = (event.clientY - window.innerHeight / 2);
+        };
+        document.addEventListener('mousemove', onMouseMove);
 
-            container.addEventListener('mousedown', (e) => { isMouseDown = true; });
-            container.addEventListener('mouseup', () => { isMouseDown = false; });
-            container.addEventListener('mouseleave', () => { isMouseDown = false; });
-            
-            container.addEventListener('mousemove', (e) => {
-                if (!isMouseDown) return;
-                const deltaMove = {
-                    x: e.offsetX - previousMousePosition.x,
-                    y: e.offsetY - previousMousePosition.y
-                };
-                
-                watchGroup.rotation.y += deltaMove.x * 0.01;
-                watchGroup.rotation.x += deltaMove.y * 0.01;
-                
-                previousMousePosition = { x: e.offsetX, y: e.offsetY };
-            });
-
-            // Animation Loop
-            function animate() {
-                requestAnimationFrame(animate);
-                if (!isMouseDown) {
-                    watchGroup.rotation.y += 0.002;
-                }
-                renderer.render(scene, camera);
+        const animate = () => {
+            requestAnimationFrame(animate);
+            if (watchGroup) {
+                watchGroup.rotation.y += 0.005 + (mouseX * 0.00002 - watchGroup.rotation.y) * 0.05;
+                watchGroup.rotation.x += (mouseY * 0.00002 - watchGroup.rotation.x) * 0.05;
             }
-            animate();
-            
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            });
-        }
-        
-        // Wait for the DOM to be fully loaded before initializing scripts
-        document.addEventListener('DOMContentLoaded', initThreeJS);
+            renderer.render(scene, camera);
+        };
 
-    </script>
-</body>
-</html>
+        const onResize = () => {
+            camera.aspect = currentMount.clientWidth / currentMount.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+        };
+        window.addEventListener('resize', onResize);
+        
+        init();
+        animate();
+
+        return () => {
+            window.removeEventListener('resize', onResize);
+            document.removeEventListener('mousemove', onMouseMove);
+            currentMount.removeChild(renderer.domElement);
+        };
+    }, []);
+
+    return <div ref={mountRef} className="absolute top-0 left-0 w-full h-full z-10" />;
+};
+
+
+const HomePage = () => (
+    <>
+        <P5Background />
+        <section className="relative h-screen flex items-center justify-center text-center overflow-hidden">
+            <HeroThreeJS />
+            <div className="relative z-20 max-w-4xl mx-auto px-4">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-4" style={{textShadow: '0 0 20px rgba(0,0,0,0.7)'}}>
+                    Timeless Precision, Modern Elegance.
+                </h1>
+                <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                    Discover exquisite timepieces and expert craftsmanship at Gamage. Your journey into the world of fine watches starts here.
+                </p>
+            </div>
+        </section>
+    </>
+);
+
+const AllWatchesPage = () => {
+    const watches = [
+        { title: 'Seiko Prospex', price: 'LKR 150,000', img: 'https://placehold.co/400x400/1a202c/ffffff?text=Seiko' },
+        { title: 'Tissot PRX', price: 'LKR 220,000', img: 'https://placehold.co/400x400/2d3748/ffffff?text=Tissot' },
+        { title: 'Casio G-Shock', price: 'LKR 45,000', img: 'https://placehold.co/400x400/4a5568/ffffff?text=G-Shock' },
+        { title: 'Rolex Submariner', price: 'LKR 4,500,000', img: 'https://placehold.co/400x400/718096/ffffff?text=Rolex' },
+        { title: 'Omega Speedmaster', price: 'LKR 2,100,000', img: 'https://placehold.co/400x400/a0aec0/000000?text=Omega' },
+        { title: 'Citizen Promaster', price: 'LKR 95,000', img: 'https://placehold.co/400x400/cbd5e0/000000?text=Citizen' },
+        { title: 'Hamilton Khaki', price: 'LKR 180,000', img: 'https://placehold.co/400x400/e2e8f0/000000?text=Hamilton' },
+        { title: 'Orient Bambino', price: 'LKR 65,000', img: 'https://placehold.co/400x400/edf2f7/000000?text=Orient' },
+    ];
+
+    return (
+        <div className="pt-24 pb-16 bg-black bg-opacity-20">
+            <div className="container mx-auto px-6 lg:px-8">
+                <div className="text-center mb-16">
+                    <SectionTitle>All Our Watches</SectionTitle>
+                    <p className="text-gray-400 text-lg max-w-3xl mx-auto">Browse our entire selection of premium timepieces.</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {watches.map((watch, i) => (
+                        <ProductCard key={i} imageUrl={watch.img} title={watch.title} price={watch.price} delay={i * 100} />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const AccessoriesPage = () => {
+     const accessories = [
+        { title: 'Leather Strap', price: 'LKR 15,000', img: 'https://placehold.co/400x400/4a5568/ffffff?text=Strap' },
+        { title: 'Watch Roll', price: 'LKR 25,000', img: 'https://placehold.co/400x400/2d3748/ffffff?text=Roll' },
+        { title: 'Polishing Cloth', price: 'LKR 5,000', img: 'https://placehold.co/400x400/1a202c/ffffff?text=Cloth' },
+        { title: 'Spring Bar Tool', price: 'LKR 8,000', img: 'https://placehold.co/400x400/718096/ffffff?text=Tool' },
+    ];
+    return (
+        <div className="pt-24 pb-16">
+            <div className="container mx-auto px-6 lg:px-8">
+                <div className="text-center mb-16">
+                    <SectionTitle>Watch Accessories</SectionTitle>
+                    <p className="text-gray-400 text-lg max-w-3xl mx-auto">Enhance your timepieces with our premium accessories.</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {accessories.map((item, i) => (
+                        <ProductCard key={i} imageUrl={item.img} title={item.title} price={item.price} delay={i * 100} />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ContactPage = () => (
+    <div className="pt-24 pb-16 bg-black bg-opacity-20">
+        <div className="container mx-auto px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+                <div className="reveal-left">
+                    <SectionTitle>Get In Touch</SectionTitle>
+                    <p className="text-gray-400 mb-8 text-lg">
+                        Have a question or need a quote for a repair? We'd love to hear from you. Visit us in-store or contact us through the details below.
+                    </p>
+                    <div className="space-y-6">
+                        <div className="flex items-center space-x-4"><span className="text-white">📍</span><span className="text-gray-300">Main street, Elpitiya, Sri Lanka</span></div>
+                        <div className="flex items-center space-x-4"><span className="text-white">📞</span><span className="text-gray-300">071 177 7573</span></div>
+                        <div className="flex items-center space-x-4"><span className="text-white">✉️</span><span className="text-gray-300">gamagewatches@gmail.com</span></div>
+                    </div>
+                </div>
+                <div className="reveal-right">
+                    <GlassCard className="p-8">
+                        <form>
+                            <div className="mb-5">
+                                <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-300">Full Name</label>
+                                <input type="text" id="name" className="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="John Doe" required />
+                            </div>
+                            <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center">Send Message</button>
+                        </form>
+                    </GlassCard>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+
+// --- Main App Component ---
+export default function App() {
+    const [page, setPage] = useState('home');
+
+    useEffect(() => {
+        // Check if ScrollReveal is available on the window object
+        if (window.ScrollReveal) {
+            const sr = window.ScrollReveal({
+                distance: '50px',
+                duration: 1500,
+                easing: 'cubic-bezier(0.5, 0, 0, 1)',
+                reset: false,
+            });
+            sr.reveal('.reveal-up', { origin: 'bottom', interval: 100 });
+            sr.reveal('.reveal-left', { origin: 'left' });
+            sr.reveal('.reveal-right', { origin: 'right' });
+        }
+    }, [page]); // Re-run animations on page change
+
+    const navigate = (newPage) => {
+        setPage(newPage);
+        window.scrollTo(0, 0);
+    };
+
+    const renderPage = () => {
+        switch (page) {
+            case 'home': return <HomePage />;
+            case 'all-watches': return <AllWatchesPage />;
+            case 'accessories': return <AccessoriesPage />;
+            case 'contact': return <ContactPage />;
+            default: return <HomePage />;
+        }
+    };
+
+    const NavLink = ({ children, pageName }) => (
+        <button onClick={() => navigate(pageName)} className={`text-gray-300 hover:text-white transition ${page === pageName ? 'text-white font-semibold' : ''}`}>
+            {children}
+        </button>
+    );
+
+    return (
+        <div className="bg-[#0a0a0a] text-gray-200 font-sans antialiased">
+            <style>{`
+                body { font-family: 'Poppins', sans-serif; }
+            `}</style>
+            
+            <header className="fixed top-0 left-0 w-full p-4 z-50 transition-all duration-300 bg-black bg-opacity-70 backdrop-blur-sm shadow-lg">
+                <div className="container mx-auto flex justify-between items-center">
+                    <button onClick={() => navigate('home')} className="flex items-center space-x-3">
+                        <img src="https://i.imgur.com/g8f4HhD.png" alt="Gamage Watches Logo" className="h-12 w-12 rounded-full border-2 border-gray-600"/>
+                        <span className="text-xl font-bold text-white">GAMAGE</span>
+                    </button>
+                    <nav className="hidden md:flex items-center space-x-8">
+                        <NavLink pageName="home">Home</NavLink>
+                        <NavLink pageName="all-watches">All Watches</NavLink>
+                        <NavLink pageName="accessories">Accessories</NavLink>
+                        <NavLink pageName="contact">Contact</NavLink>
+                    </nav>
+                    <div className="flex items-center space-x-6">
+                        <button><SearchIcon /></button>
+                        <button><UserIcon /></button>
+                        <button><CartIcon /></button>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                {renderPage()}
+            </main>
+
+            <footer className="py-12 bg-black">
+                <div className="container mx-auto px-6 lg:px-8 text-center text-gray-500">
+                    <p>&copy; {new Date().getFullYear()} Gamage Watch Selling & Repairing. All Rights Reserved.</p>
+                </div>
+            </footer>
+        </div>
+    );
+}
