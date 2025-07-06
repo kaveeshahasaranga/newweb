@@ -1,372 +1,458 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAMAGE WATCH TECNICTIONS - The Future of Technology</title>
-
-    <!-- Tailwind CSS CDN -->
+    <title>Gamage Watch Technicians - Precision & Style</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts -->
+    
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Three.js and p5.js Libraries -->
+    <!-- three.js & p5.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
 
-    <!-- Custom Styles & Tailwind Config -->
     <style>
+        /* Custom styles for a polished look */
         body {
             font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            background-color: #0a0a0a;
+            color: #e2e8f0;
+            overflow-x: hidden;
         }
-        /* Canvas for 3D model */
-        #watch-canvas {
-            position: absolute;
+        /* Style for the p5.js canvas to be a background */
+        #p5-canvas {
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        /* Canvas for p5.js background */
-        #tech-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             z-index: -1;
+            width: 100vw;
+            height: 100vh;
+        }
+        /* Style for the three.js canvas */
+        #three-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        #three-canvas:active {
+            cursor: grabbing;
+        }
+        /* Glassmorphism effect for cards and nav */
+        .glass-effect {
+            background: rgba(17, 25, 40, 0.75);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.125);
         }
         /* Custom gradient text */
         .gradient-text {
-            background: linear-gradient(90deg, #a5b4fc, #3b82f6);
+            background: linear-gradient(to right, #a78bfa, #f472b6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        /* Scroll reveal animation */
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
         }
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
+        /* Custom button style */
+        .btn-primary {
+            @apply px-6 py-3 font-semibold text-white bg-indigo-600 rounded-lg shadow-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:scale-105;
         }
-        /* Custom glassmorphism effect */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .btn-secondary {
+            @apply px-6 py-3 font-semibold text-white bg-gray-700 rounded-lg shadow-lg hover:bg-gray-600 transition-all duration-300 ease-in-out transform hover:scale-105;
         }
     </style>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'brand-primary': '#3b82f6', // Vivid Blue
-                        'brand-secondary': '#0f172a', // Slate Dark Blue
-                        'brand-light': '#1e293b', // Lighter Slate
-                        'brand-text': '#94a3b8', // Slate Gray text
-                        'brand-heading': '#f1f5f9', // Almost White headings
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
 </head>
-<body class="bg-brand-secondary text-brand-text">
+<body class="antialiased">
+
+    <!-- P5.js Background Canvas -->
+    <div id="p5-canvas"></div>
 
     <!-- Header -->
-    <header class="bg-brand-secondary/70 backdrop-blur-lg fixed top-0 left-0 right-0 z-50 border-b border-slate-700/50">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#home" class="text-2xl font-bold text-brand-heading">
-                GWT<span class="text-brand-primary">.</span>
-            </a>
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="#features" class="text-sm font-medium hover:text-brand-primary transition duration-300">Features</a>
-                <a href="#tech" class="text-sm font-medium hover:text-brand-primary transition duration-300">Technology</a>
-                <a href="#products" class="text-sm font-medium hover:text-brand-primary transition duration-300">Products</a>
-                <a href="#contact" class="text-sm font-medium hover:text-brand-primary transition duration-300">Contact Us</a>
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between glass-effect rounded-xl p-4">
+                <a href="#" class="text-2xl font-bold tracking-wider">
+                    <span class="gradient-text">GAMAGE</span>
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#featured" class="hover:text-indigo-400 transition-colors">Featured</a>
+                    <a href="#craftsmanship" class="hover:text-indigo-400 transition-colors">Craftsmanship</a>
+                    <a href="#studio" class="hover:text-indigo-400 transition-colors">Studio</a>
+                    <a href="#contact" class="hover:text-indigo-400 transition-colors">Contact</a>
+                </div>
+                <button class="md:hidden text-white focus:outline-none" id="mobile-menu-button">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
             </div>
-            <a href="#products" class="hidden md:block bg-brand-primary text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-500 transition duration-300">Explore Collection</a>
         </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass-effect mx-6 rounded-b-xl">
+            <a href="#featured" class="block py-2 px-4 text-sm hover:bg-gray-700">Featured</a>
+            <a href="#craftsmanship" class="block py-2 px-4 text-sm hover:bg-gray-700">Craftsmanship</a>
+            <a href="#studio" class="block py-2 px-4 text-sm hover:bg-gray-700">Studio</a>
+            <a href="#contact" class="block py-2 px-4 text-sm hover:bg-gray-700">Contact</a>
+        </div>
     </header>
 
+    <!-- Main Content -->
     <main>
-        <!-- Hero Section with 3D Model -->
-        <section id="home" class="relative h-screen flex items-center justify-center text-center overflow-hidden">
-            <canvas id="watch-canvas"></canvas>
-            <div class="relative z-10 px-6">
-                <h1 class="text-5xl md:text-7xl font-extrabold mb-4 leading-tight text-brand-heading">
-                    The Future of <span class="gradient-text">Technology</span>
-                </h1>
-                <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-brand-text">The style that manages your life and time.</p>
-                <a href="#features" class="bg-brand-primary text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-500 transform hover:scale-105 transition-all duration-300">Learn More</a>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section id="features" class="py-24 bg-brand-secondary">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-4xl font-bold mb-4 text-brand-heading reveal">Your Smartest Companion</h2>
-                <p class="max-w-2xl mx-auto mb-16 text-brand-text reveal">Health, efficiency, and connectivity, all in one place.</p>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="glass-card p-8 rounded-2xl reveal">
-                        <h3 class="text-xl font-bold mb-2 text-brand-heading">Precise Health Data</h3>
-                        <p class="text-brand-text">Accurately provides data like heart rate, blood oxygen level (SpO2), and sleep patterns.</p>
-                    </div>
-                    <div class="glass-card p-8 rounded-2xl reveal" style="transition-delay: 200ms;">
-                        <h3 class="text-xl font-bold mb-2 text-brand-heading">Sleek Finish</h3>
-                        <p class="text-brand-text">Crafted with Titanium and Sapphire Crystal, ensuring it's lightweight yet highly durable.</p>
-                    </div>
-                    <div class="glass-card p-8 rounded-2xl reveal" style="transition-delay: 400ms;">
-                        <h3 class="text-xl font-bold mb-2 text-brand-heading">Versatile Connectivity</h3>
-                        <p class="text-brand-text">Supports calls, messages, and notifications, while also facilitating NFC payments.</p>
+        <!-- Hero Section -->
+        <section id="hero" class="h-screen flex items-center justify-center relative">
+            <div class="container mx-auto px-6 flex flex-col lg:flex-row items-center">
+                <!-- Left Text Content -->
+                <div class="lg:w-1/2 text-center lg:text-left mb-10 lg:mb-0">
+                    <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
+                        Where <span class="gradient-text">Timeless</span> Design<br>Meets Modern Mastery.
+                    </h1>
+                    <p class="text-lg md:text-xl text-slate-300 mb-8 max-w-xl mx-auto lg:mx-0">
+                        Discover meticulously crafted timepieces that blend tradition with cutting-edge technology. Each watch is a statement of precision and elegance.
+                    </p>
+                    <div class="flex justify-center lg:justify-start space-x-4">
+                        <a href="#featured" class="btn-primary">Explore Collection</a>
+                        <a href="#studio" class="btn-secondary">Customize Yours</a>
                     </div>
                 </div>
-            </div>
-        </section>
-        
-        <!-- Technology Section with p5.js -->
-        <section id="tech" class="relative py-24 overflow-hidden">
-            <div id="tech-background"></div>
-            <div class="container mx-auto px-6 relative z-10 grid md:grid-cols-2 gap-16 items-center">
-                <div class="reveal">
-                    <h2 class="text-4xl font-bold mb-6 text-brand-heading">AI-Powered Chip</h2>
-                    <p class="text-brand-text mb-4">Our latest GWT-A1 chip delivers 2x faster performance and 50% more efficient power management than before.</p>
-                    <p class="text-brand-text">It analyzes your data to provide personalized health insights.</p>
-                </div>
-                <div class="h-80 w-full glass-card rounded-2xl reveal">
-                    <!-- Placeholder for a tech graphic or animation -->
-                    <div class="flex items-center justify-center h-full">
-                        <p class="text-brand-text">GWT-A1 Chip Visualization</p>
-                    </div>
+                <!-- Right 3D Model -->
+                <div id="three-canvas-container" class="lg:w-1/2 h-[50vh] lg:h-[70vh] w-full">
+                    <div id="three-canvas"></div>
+                    <p class="text-center text-xs text-slate-500 mt-2">Drag to rotate the watch</p>
                 </div>
             </div>
         </section>
 
-        <!-- Products Section -->
-        <section id="products" class="py-24 bg-brand-secondary">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-4xl font-bold mb-4 text-brand-heading reveal">Our Collection</h2>
-                <p class="max-w-2xl mx-auto mb-16 text-brand-text reveal">Designed to fit every style and every need.</p>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <!-- Product Card 1 -->
-                    <div class="glass-card rounded-2xl p-8 flex flex-col items-center text-center group reveal">
-                        <div class="h-48 w-48 bg-slate-700 rounded-full mb-6 flex items-center justify-center group-hover:bg-brand-primary transition-colors duration-300">
-                           <span class="text-brand-heading">Model X</span>
-                        </div>
-                        <h3 class="text-2xl font-bold text-brand-heading mb-2">GWT Fusion X</h3>
-                        <p class="text-brand-text mb-4 flex-grow">For professionals and tech enthusiasts.</p>
-                        <p class="text-2xl font-bold text-brand-primary mb-6">$399</p>
-                        <a href="#" class="bg-slate-700 text-white w-full block py-3 rounded-full hover:bg-brand-primary transition duration-300">View Details</a>
+        <!-- Featured Watches Section -->
+        <section id="featured" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">Featured Timepieces</h2>
+                    <p class="text-slate-400 mt-2">Handpicked for their exceptional design and performance.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Watch Card 1 -->
+                    <div class="glass-effect rounded-xl p-6 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300">
+                        <div class="w-48 h-48 bg-gray-800 rounded-full mb-4 flex items-center justify-center font-bold text-slate-500">3D Model Placeholder</div>
+                        <h3 class="text-xl font-bold mb-2">The Chronos Mk. III</h3>
+                        <p class="text-slate-400 mb-4 text-sm">A bold statement of engineering prowess, featuring a triple-dial chronograph and a titanium case.</p>
+                        <span class="text-lg font-semibold gradient-text">$2,499</span>
                     </div>
-                    <!-- Product Card 2 -->
-                    <div class="glass-card rounded-2xl p-8 flex flex-col items-center text-center group reveal" style="transition-delay: 200ms;">
-                        <div class="h-48 w-48 bg-slate-700 rounded-full mb-6 flex items-center justify-center group-hover:bg-brand-primary transition-colors duration-300">
-                           <span class="text-brand-heading">Model A</span>
-                        </div>
-                        <h3 class="text-2xl font-bold text-brand-heading mb-2">GWT Air</h3>
-                        <p class="text-brand-text mb-4 flex-grow">For daily use, with a simple and elegant look.</p>
-                        <p class="text-2xl font-bold text-brand-primary mb-6">$279</p>
-                        <a href="#" class="bg-slate-700 text-white w-full block py-3 rounded-full hover:bg-brand-primary transition duration-300">View Details</a>
+                    <!-- Watch Card 2 -->
+                    <div class="glass-effect rounded-xl p-6 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300">
+                        <div class="w-48 h-48 bg-gray-800 rounded-full mb-4 flex items-center justify-center font-bold text-slate-500">3D Model Placeholder</div>
+                        <h3 class="text-xl font-bold mb-2">The Aetherium</h3>
+                        <p class="text-slate-400 mb-4 text-sm">Minimalist elegance with a sapphire crystal face and an automatic, self-winding movement.</p>
+                        <span class="text-lg font-semibold gradient-text">$1,850</span>
                     </div>
-                    <!-- Product Card 3 -->
-                    <div class="glass-card rounded-2xl p-8 flex flex-col items-center text-center group reveal" style="transition-delay: 400ms;">
-                        <div class="h-48 w-48 bg-slate-700 rounded-full mb-6 flex items-center justify-center group-hover:bg-brand-primary transition-colors duration-300">
-                           <span class="text-brand-heading">Model S</span>
-                        </div>
-                        <h3 class="text-2xl font-bold text-brand-heading mb-2">GWT Sport</h3>
-                        <p class="text-brand-text mb-4 flex-grow">Specialized for sports and workouts.</p>
-                        <p class="text-2xl font-bold text-brand-primary mb-6">$229</p>
-                        <a href="#" class="bg-slate-700 text-white w-full block py-3 rounded-full hover:bg-brand-primary transition duration-300">View Details</a>
+                    <!-- Watch Card 3 -->
+                    <div class="glass-effect rounded-xl p-6 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300">
+                        <div class="w-48 h-48 bg-gray-800 rounded-full mb-4 flex items-center justify-center font-bold text-slate-500">3D Model Placeholder</div>
+                        <h3 class="text-xl font-bold mb-2">The Voyager GMT</h3>
+                        <p class="text-slate-400 mb-4 text-sm">For the world traveler. Track two time zones simultaneously with this robust and reliable companion.</p>
+                        <span class="text-lg font-semibold gradient-text">$3,200</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Contact Section -->
-        <section id="contact" class="py-24 bg-brand-light">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-4xl font-bold mb-4 text-brand-heading reveal">Get in Touch</h2>
-                <p class="max-w-2xl mx-auto mb-12 text-brand-text reveal">Contact us with your ideas, suggestions, or any inquiries.</p>
-                <div class="max-w-2xl mx-auto glass-card p-8 rounded-2xl reveal">
-                    <form id="contactForm">
-                        <div class="grid sm:grid-cols-2 gap-6 mb-6">
-                            <input type="text" id="name" placeholder="Your Name" class="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary" required>
-                            <input type="email" placeholder="Email Address" class="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary" required>
-                        </div>
-                        <textarea placeholder="Your Message..." rows="5" class="w-full bg-slate-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary mb-6" required></textarea>
-                        <button type="submit" class="bg-brand-primary text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-500 transform hover:scale-105 transition-all duration-300">Send Message</button>
-                    </form>
+        <!-- Craftsmanship Section -->
+        <section id="craftsmanship" class="py-20 bg-black bg-opacity-20">
+            <div class="container mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2">
+                    <div class="glass-effect rounded-xl p-8">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">The Art of Horology</h2>
+                        <p class="text-slate-300 mb-4">
+                            Our watches are more than just time-tellers; they are a legacy of craftsmanship passed down through generations. We combine traditional techniques with state-of-the-art materials to create timepieces of unparalleled quality.
+                        </p>
+                        <ul class="space-y-3 text-slate-300">
+                            <li class="flex items-center"><span class="text-indigo-400 mr-3">✓</span> Swiss Automatic Movements</li>
+                            <li class="flex items-center"><span class="text-indigo-400 mr-3">✓</span> Sapphire Crystal Glass</li>
+                            <li class="flex items-center"><span class="text-indigo-400 mr-3">✓</span> 316L Surgical Grade Steel</li>
+                            <li class="flex items-center"><span class="text-indigo-400 mr-3">✓</span> Hand-Assembled & Inspected</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 h-96 bg-gray-800 rounded-xl flex items-center justify-center">
+                    <p class="text-slate-500 font-semibold">Interactive exploded view coming soon</p>
                 </div>
             </div>
         </section>
+
+        <!-- Customization Studio Section -->
+        <section id="studio" class="py-20">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold">Customization Studio</h2>
+                <p class="text-slate-400 mt-2 mb-8 max-w-2xl mx-auto">Become the designer. Create a watch that is uniquely yours by choosing the case, dial, hands, and strap.</p>
+                <div class="glass-effect rounded-xl p-8 md:p-12 max-w-4xl mx-auto">
+                    <div class="flex flex-col md:flex-row items-center gap-8">
+                        <div class="w-full md:w-1/2 h-80 bg-gray-800 rounded-lg flex items-center justify-center">
+                           <p class="text-slate-500 font-semibold">Live 3D Customizer Placeholder</p>
+                        </div>
+                        <div class="w-full md:w-1/2 text-left">
+                            <div class="mb-4">
+                                <label class="font-bold">Case Finish:</label>
+                                <div class="flex space-x-2 mt-2">
+                                    <button class="w-10 h-10 rounded-full bg-gray-300 border-2 border-indigo-400"></button>
+                                    <button class="w-10 h-10 rounded-full bg-gray-900 border-2 border-transparent hover:border-indigo-400"></button>
+                                    <button class="w-10 h-10 rounded-full bg-yellow-500 border-2 border-transparent hover:border-indigo-400"></button>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="font-bold">Dial Color:</label>
+                                <div class="flex space-x-2 mt-2">
+                                    <button class="w-10 h-10 rounded-full bg-blue-900 border-2 border-transparent hover:border-indigo-400"></button>
+                                    <button class="w-10 h-10 rounded-full bg-white border-2 border-indigo-400"></button>
+                                    <button class="w-10 h-10 rounded-full bg-green-800 border-2 border-transparent hover:border-indigo-400"></button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="font-bold">Strap Material:</label>
+                                <div class="flex space-x-2 mt-2">
+                                    <button class="px-4 py-2 rounded-lg bg-gray-700 text-sm hover:bg-indigo-600">Leather</button>
+                                    <button class="px-4 py-2 rounded-lg bg-gray-900 text-sm hover:bg-indigo-600">Metal</button>
+                                    <button class="px-4 py-2 rounded-lg bg-gray-700 text-sm hover:bg-indigo-600">Nylon</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary mt-8">Finalize & Inquire</button>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
-    <footer class="bg-brand-secondary border-t border-slate-700/50">
-        <div class="container mx-auto px-6 py-8 text-center text-brand-text">
-            <p class="text-lg font-bold text-brand-heading mb-2">GAMAGE WATCH TECNICTIONS</p>
-            <div class="flex justify-center space-x-6 my-4">
-                <a href="#" class="hover:text-brand-primary">Facebook</a>
-                <a href="#" class="hover:text-brand-primary">Instagram</a>
-                <a href="#" class="hover:text-brand-primary">X (Twitter)</a>
+    <footer id="contact" class="bg-black bg-opacity-40 pt-12">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-1">
+                    <h3 class="text-xl font-bold mb-2"><span class="gradient-text">GAMAGE</span></h3>
+                    <p class="text-slate-400 text-sm">Crafting the future of time.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-3">Company</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-white">About Us</a></li>
+                        <li><a href="#" class="hover:text-white">Our Heritage</a></li>
+                        <li><a href="#" class="hover:text-white">Careers</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-3">Support</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-white">Contact</a></li>
+                        <li><a href="#" class="hover:text-white">FAQ</a></li>
+                        <li><a href="#" class="hover:text-white">Warranty</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-3">Connect</h4>
+                     <div class="flex space-x-4">
+                        <a href="#" class="text-slate-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>
+                        </a>
+                        <a href="#" class="text-slate-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
+                        </a>
+                         <a href="#" class="text-slate-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.098 3.7c.636-.247 1.363-.416 2.427-.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0-2a7 7 0 110 14 7 7 0 010-14zm6.406-2.186a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4z" clip-rule="evenodd" /></svg>
+                        </a>
+                    </div>
+                </div>
             </div>
-            <p class="text-sm">&copy; 2025 GAMAGE WATCH TECNICTIONS. All rights reserved.</p>
+            <div class="mt-8 border-t border-gray-800 pt-6 pb-8 text-center text-sm text-slate-500">
+                <p>&copy; 2024 Gamage Watch Technicians. All Rights Reserved.</p>
+            </div>
         </div>
     </footer>
 
     <script>
-        // --- Three.js 3D Watch Model ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('watch-canvas'), alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        // --- Mobile Menu Toggle ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(5, 10, 7.5);
-        scene.add(directionalLight);
-
-        // Watch Model (Placeholder Geometry)
-        const watchGroup = new THREE.Group();
-        const caseGeometry = new THREE.CylinderGeometry(1, 1, 0.3, 64);
-        const caseMaterial = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.2 });
-        const watchCase = new THREE.Mesh(caseGeometry, caseMaterial);
-        watchGroup.add(watchCase);
-        
-        const screenGeometry = new THREE.CircleGeometry(0.9, 64);
-        const screenMaterial = new THREE.MeshBasicMaterial({ color: 0x0f172a });
-        const watchScreen = new THREE.Mesh(screenGeometry, screenMaterial);
-        watchScreen.position.z = 0.16;
-        watchGroup.add(watchScreen);
-
-        const strapGeometry = new THREE.TorusGeometry(1.5, 0.15, 16, 100);
-        const strapMaterial = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
-        const strap = new THREE.Mesh(strapGeometry, strapMaterial);
-        strap.rotation.x = Math.PI / 2;
-        watchGroup.add(strap);
-        
-        scene.add(watchGroup);
-        camera.position.z = 5;
-
-        // Animation Loop
-        function animate() {
-            requestAnimationFrame(animate);
-            watchGroup.rotation.y += 0.005;
-            watchGroup.rotation.x += 0.001;
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        // --- Header Scroll Effect ---
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('glass-effect', 'shadow-lg');
+            } else {
+                header.classList.remove('glass-effect', 'shadow-lg');
+            }
         });
 
         // --- p5.js Background Animation ---
-        let particles = [];
-        const p5Sketch = (p) => {
-            p.setup = () => {
-                let canvas = p.createCanvas(p.windowWidth, p.windowHeight);
-                canvas.parent('tech-background');
-                for(let i = 0; i < 100; i++){
+        function setupP5(p) {
+            let particles = [];
+            
+            p.setup = function() {
+                const canvas = p.createCanvas(p.windowWidth, p.windowHeight);
+                canvas.parent('p5-canvas');
+                for (let i = 0; i < 100; i++) {
                     particles.push(new Particle(p));
                 }
             };
-            p.draw = () => {
-                p.clear();
+
+            p.draw = function() {
+                p.clear(); // Use clear for a transparent background
                 particles.forEach(particle => {
                     particle.update();
                     particle.draw();
-                    particle.connect(particles, p);
+                    particle.checkEdges();
                 });
             };
-             p.windowResized = () => {
+            
+            p.windowResized = function() {
                 p.resizeCanvas(p.windowWidth, p.windowHeight);
-            };
-        };
-        new p5(p5Sketch);
+            }
 
-        class Particle {
-            constructor(p) {
-                this.p = p;
-                this.pos = p.createVector(p.random(p.width), p.random(p.height));
-                this.vel = p.createVector(p.random(-0.5, 0.5), p.random(-0.5, 0.5));
-                this.size = 2;
-            }
-            update() {
-                this.pos.add(this.vel);
-                if(this.pos.x < 0 || this.pos.x > this.p.width) this.vel.x *= -1;
-                if(this.pos.y < 0 || this.pos.y > this.p.height) this.vel.y *= -1;
-            }
-            draw() {
-                this.p.noStroke();
-                this.p.fill('rgba(59, 130, 246, 0.5)');
-                this.p.circle(this.pos.x, this.pos.y, this.size);
-            }
-            connect(particles, p){
-                particles.forEach(particle => {
-                    const d = p.dist(this.pos.x, this.pos.y, particle.pos.x, particle.pos.y);
-                    if(d < 120){
-                        p.stroke('rgba(59, 130, 246, 0.1)');
-                        p.line(this.pos.x, this.pos.y, particle.pos.x, particle.pos.y);
+            class Particle {
+                constructor(p) {
+                    this.p = p;
+                    this.pos = this.p.createVector(this.p.random(this.p.width), this.p.random(this.p.height));
+                    this.vel = this.p.createVector(this.p.random(-0.3, 0.3), this.p.random(-0.3, 0.3));
+                    this.size = this.p.random(1, 3);
+                }
+
+                update() {
+                    this.pos.add(this.vel);
+                }
+
+                draw() {
+                    this.p.noStroke();
+                    this.p.fill('rgba(167, 139, 250, 0.5)'); // Corresponds to Tailwind's indigo-400
+                    this.p.circle(this.pos.x, this.pos.y, this.size);
+                }
+
+                checkEdges() {
+                    if (this.pos.x < 0 || this.pos.x > this.p.width || this.pos.y < 0 || this.pos.y > this.p.height) {
+                        this.pos.x = this.p.random(this.p.width);
+                        this.pos.y = this.p.random(this.p.height);
                     }
-                });
-            }
-        }
-
-        // --- Scroll Reveal Animation ---
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                var elementVisible = 50;
-                if (elementTop < windowHeight - elementVisible) {
-                    reveals[i].classList.add("active");
                 }
             }
         }
-        window.addEventListener("scroll", reveal);
-        reveal(); // Initial check
-        
-        // --- Contact Form Submission ---
-        const contactForm = document.getElementById('contactForm');
-        if (contactForm) {
-            contactForm.addEventListener('submit', (event) => {
-                event.preventDefault();
-                const name = document.getElementById('name').value;
-                alert(`Thank you, ${name}! We have received your message.`);
-                contactForm.reset();
+        new p5(setupP5);
+
+
+        // --- three.js 3D Watch Model ---
+        function initThreeJS() {
+            const container = document.getElementById('three-canvas');
+            if (!container) return;
+
+            // Scene, Camera, Renderer
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
+
+            // Watch Group
+            const watchGroup = new THREE.Group();
+            scene.add(watchGroup);
+
+            // Watch Body (Case)
+            const caseGeometry = new THREE.CylinderGeometry(1.5, 1.5, 0.5, 64);
+            const caseMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.2 });
+            const watchCase = new THREE.Mesh(caseGeometry, caseMaterial);
+            watchGroup.add(watchCase);
+
+            // Watch Face
+            const faceGeometry = new THREE.CircleGeometry(1.4, 64);
+            const faceMaterial = new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 0.1, roughness: 0.5 });
+            const watchFace = new THREE.Mesh(faceGeometry, faceMaterial);
+            watchFace.position.z = 0.251;
+            watchGroup.add(watchFace);
+            
+            // Hour markers
+            for (let i = 0; i < 12; i++) {
+                const markerGeometry = new THREE.BoxGeometry(0.05, 0.2, 0.05);
+                const markerMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9, roughness: 0.1 });
+                const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+                const angle = (i / 12) * Math.PI * 2;
+                marker.position.set(Math.sin(angle) * 1.2, Math.cos(angle) * 1.2, 0.26);
+                marker.rotation.z = -angle;
+                watchGroup.add(marker);
+            }
+
+            // Hands
+            const handMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1.0, roughness: 0.1 });
+            // Hour hand
+            const hourHandGeometry = new THREE.BoxGeometry(0.05, 0.7, 0.05);
+            const hourHand = new THREE.Mesh(hourHandGeometry, handMaterial);
+            hourHand.position.z = 0.3;
+            hourHand.position.y = 0.35;
+            watchGroup.add(hourHand);
+            // Minute hand
+            const minuteHandGeometry = new THREE.BoxGeometry(0.03, 1.1, 0.05);
+            const minuteHand = new THREE.Mesh(minuteHandGeometry, handMaterial);
+            minuteHand.position.z = 0.3;
+            minuteHand.position.y = 0.55;
+            watchGroup.add(minuteHand);
+            
+            watchGroup.rotation.x = 0.5;
+
+            // Mouse interaction
+            let isMouseDown = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            container.addEventListener('mousedown', (e) => { isMouseDown = true; });
+            container.addEventListener('mouseup', () => { isMouseDown = false; });
+            container.addEventListener('mouseleave', () => { isMouseDown = false; });
+            
+            container.addEventListener('mousemove', (e) => {
+                if (!isMouseDown) return;
+                const deltaMove = {
+                    x: e.offsetX - previousMousePosition.x,
+                    y: e.offsetY - previousMousePosition.y
+                };
+                
+                watchGroup.rotation.y += deltaMove.x * 0.01;
+                watchGroup.rotation.x += deltaMove.y * 0.01;
+                
+                previousMousePosition = { x: e.offsetX, y: e.offsetY };
+            });
+
+            // Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+                if (!isMouseDown) {
+                    watchGroup.rotation.y += 0.002;
+                }
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
             });
         }
-    </script>
+        
+        // Wait for the DOM to be fully loaded before initializing scripts
+        document.addEventListener('DOMContentLoaded', initThreeJS);
 
+    </script>
 </body>
 </html>
