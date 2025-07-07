@@ -30,6 +30,7 @@
             width: 100%;
             height: 100%;
             z-index: 1;
+            cursor: grab;
         }
         .font-serif {
             font-family: 'Playfair Display', serif;
@@ -39,7 +40,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        /* Page transition styles */
         .page {
             display: none;
             animation: fadeIn 0.6s ease-in-out;
@@ -48,7 +48,7 @@
             display: block;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .reveal {
@@ -61,14 +61,44 @@
             transform: translateY(0);
         }
         .glass-card {
-            background: rgba(10, 10, 10, 0.4);
+            background: rgba(20, 20, 20, 0.4);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s, border 0.3s;
         }
-        /* Mobile Menu Transition */
+        .glass-card:hover {
+            background: rgba(25, 25, 25, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
         #mobile-menu {
             transition: transform 0.3s ease-in-out;
+        }
+        /* Preloader styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0a0a0a;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out;
+        }
+        .loader {
+            border: 4px solid #171717;
+            border-top: 4px solid #ca8a04;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
     <script>
@@ -93,6 +123,11 @@
 </head>
 <body class="bg-brand-bg text-brand-text">
 
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
+
     <!-- Header -->
     <header class="bg-brand-bg/70 backdrop-blur-lg fixed top-0 left-0 right-0 z-50 border-b border-neutral-800">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -104,10 +139,10 @@
             <div class="hidden md:flex items-center space-x-8">
                 <a href="#services" class="nav-link text-sm font-medium hover:text-brand-gold transition duration-300">Services</a>
                 <a href="#products" class="nav-link text-sm font-medium hover:text-brand-gold transition duration-300">Watches</a>
+                <a href="#testimonials" class="nav-link text-sm font-medium hover:text-brand-gold transition duration-300">Testimonials</a>
                 <a href="#about" class="nav-link text-sm font-medium hover:text-brand-gold transition duration-300">About Us</a>
                 <a href="#contact" class="nav-link text-sm font-medium hover:text-brand-gold transition duration-300">Contact</a>
             </div>
-            <a href="#products" class="nav-link hidden md:block border border-brand-gold text-brand-gold px-5 py-2 rounded-full text-sm font-semibold hover:bg-brand-gold hover:text-brand-bg transition duration-300">View Collection</a>
             
             <!-- Mobile Menu Button -->
             <div class="md:hidden">
@@ -123,10 +158,10 @@
     <div id="mobile-menu" class="fixed inset-0 bg-brand-bg z-40 flex flex-col items-center justify-center space-y-8 text-2xl transform -translate-x-full md:hidden">
         <a href="#services" class="mobile-nav-link text-brand-heading hover:text-brand-gold transition">Services</a>
         <a href="#products" class="mobile-nav-link text-brand-heading hover:text-brand-gold transition">Watches</a>
+        <a href="#testimonials" class="mobile-nav-link text-brand-heading hover:text-brand-gold transition">Testimonials</a>
         <a href="#about" class="mobile-nav-link text-brand-heading hover:text-brand-gold transition">About Us</a>
         <a href="#contact" class="mobile-nav-link text-brand-heading hover:text-brand-gold transition">Contact</a>
     </div>
-
 
     <main>
         <!-- Hero Section -->
@@ -144,17 +179,24 @@
 
         <!-- Services Section -->
         <section id="services" class="page py-24 bg-brand-bg min-h-screen flex items-center">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="font-serif text-3xl md:text-4xl font-bold mb-4 text-brand-heading reveal">Selling & Repairing</h2>
-                <p class="max-w-2xl mx-auto mb-16 text-brand-text reveal">Your trusted partner for authentic watches and professional care.</p>
-                <div class="grid md:grid-cols-2 gap-8">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="font-serif text-3xl md:text-4xl font-bold mb-4 text-brand-heading reveal">Selling & Repairing</h2>
+                    <p class="max-w-2xl mx-auto text-brand-text reveal">Your trusted partner for authentic watches and professional care.</p>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
                     <div class="glass-card p-8 rounded-2xl reveal text-left">
-                        <h3 class="text-2xl font-bold mb-3 text-brand-heading">Authentic Watch Sales</h3>
+                        <h3 class="text-2xl font-bold mb-4 text-brand-heading">Authentic Watch Sales</h3>
                         <p class="text-brand-text">We offer a curated collection of authentic watches from world-renowned brands. Each timepiece is guaranteed for its quality and authenticity, ensuring you invest in nothing but the best.</p>
                     </div>
                     <div class="glass-card p-8 rounded-2xl reveal text-left" style="transition-delay: 200ms;">
-                        <h3 class="text-2xl font-bold mb-3 text-brand-heading">Expert Watch Repairing</h3>
-                        <p class="text-brand-text">From simple battery replacements to complex mechanical overhauls, our skilled technicians handle every repair with precision and care, restoring your cherished watch to its former glory.</p>
+                        <h3 class="text-2xl font-bold mb-4 text-brand-heading">Expert Watch Repairing</h3>
+                        <p class="text-brand-text mb-6">Our meticulous repair process ensures your timepiece receives the highest standard of care.</p>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4"><div class="w-8 h-8 rounded-full bg-brand-gold text-brand-bg flex items-center justify-center font-bold">1</div><p>Consultation & Diagnosis</p></div>
+                            <div class="flex items-center space-x-4"><div class="w-8 h-8 rounded-full bg-brand-gold text-brand-bg flex items-center justify-center font-bold">2</div><p>Precision Repair & Servicing</p></div>
+                            <div class="flex items-center space-x-4"><div class="w-8 h-8 rounded-full bg-brand-gold text-brand-bg flex items-center justify-center font-bold">3</div><p>Final Testing & Quality Check</p></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -168,7 +210,7 @@
                     <p class="max-w-2xl mx-auto text-brand-text reveal">A glimpse into our handpicked collection for the discerning individual.</p>
                 </div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Product Card 1 -->
+                    <!-- Cards remain the same -->
                     <div class="bg-brand-bg rounded-xl overflow-hidden group reveal">
                         <img src="https://images.unsplash.com/photo-1622434641406-a15812e454e7?q=80&w=1887&auto=format&fit=crop" alt="Classic Chronograph Watch" class="w-full h-80 object-cover group-hover:opacity-80 transition-opacity duration-300">
                         <div class="p-6">
@@ -180,7 +222,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Product Card 2 -->
                     <div class="bg-brand-bg rounded-xl overflow-hidden group reveal" style="transition-delay: 200ms;">
                         <img src="https://images.unsplash.com/photo-1612811139499-52e3c236c5b9?q=80&w=1887&auto=format&fit=crop" alt="Elegant Ladies Watch" class="w-full h-80 object-cover group-hover:opacity-80 transition-opacity duration-300">
                         <div class="p-6">
@@ -192,7 +233,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Product Card 3 -->
                     <div class="bg-brand-bg rounded-xl overflow-hidden group reveal" style="transition-delay: 400ms;">
                         <img src="https://images.unsplash.com/photo-1587925358603-c2eea5305bbc?q=80&w=1887&auto=format&fit=crop" alt="Modern Digital Watch" class="w-full h-80 object-cover group-hover:opacity-80 transition-opacity duration-300">
                         <div class="p-6">
@@ -204,7 +244,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Product Card 4 -->
                     <div class="bg-brand-bg rounded-xl overflow-hidden group reveal" style="transition-delay: 600ms;">
                         <img src="https://images.unsplash.com/photo-1533139502658-0198f920d8e8?q=80&w=1887&auto=format&fit=crop" alt="Diver Pro Watch" class="w-full h-80 object-cover group-hover:opacity-80 transition-opacity duration-300">
                         <div class="p-6">
@@ -216,7 +255,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Product Card 5 -->
                     <div class="bg-brand-bg rounded-xl overflow-hidden group reveal" style="transition-delay: 800ms;">
                         <img src="https://images.unsplash.com/photo-1585123334904-845d60e97b29?q=80&w=1887&auto=format&fit=crop" alt="Minimalist Leather Watch" class="w-full h-80 object-cover group-hover:opacity-80 transition-opacity duration-300">
                         <div class="p-6">
@@ -228,7 +266,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Product Card 6 -->
                     <div class="bg-brand-bg rounded-xl overflow-hidden group reveal" style="transition-delay: 1000ms;">
                         <img src="https://images.unsplash.com/photo-1604242692760-2f7b0c26856d?q=80&w=1887&auto=format&fit=crop" alt="Aviator Pilot Watch" class="w-full h-80 object-cover group-hover:opacity-80 transition-opacity duration-300">
                         <div class="p-6">
@@ -244,8 +281,32 @@
             </div>
         </section>
 
+        <!-- Testimonials Section -->
+        <section id="testimonials" class="page py-24 bg-brand-bg min-h-screen flex items-center">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="font-serif text-3xl md:text-4xl font-bold mb-4 text-brand-heading reveal">What Our Clients Say</h2>
+                    <p class="max-w-2xl mx-auto text-brand-text reveal">Trust and satisfaction are the cornerstones of our business.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 rounded-2xl reveal">
+                        <p class="text-brand-text mb-6">"Excellent service! My old watch was repaired to perfection. It looks and works like it's brand new. Highly recommended."</p>
+                        <p class="font-bold text-brand-heading">- A. Perera</p>
+                    </div>
+                    <div class="glass-card p-8 rounded-2xl reveal" style="transition-delay: 200ms;">
+                        <p class="text-brand-text mb-6">"Found the exact watch I was looking for. The collection is authentic and the staff is very knowledgeable. Thank you, Gamage Watches!"</p>
+                        <p class="font-bold text-brand-heading">- S. Fernando</p>
+                    </div>
+                    <div class="glass-card p-8 rounded-2xl reveal" style="transition-delay: 400ms;">
+                        <p class="text-brand-text mb-6">"The best place for watch repairs in Elpitiya. Professional, trustworthy, and fair pricing. I wouldn't go anywhere else."</p>
+                        <p class="font-bold text-brand-heading">- D. Silva</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- About Us Section -->
-        <section id="about" class="page py-24 bg-brand-bg min-h-screen flex items-center">
+        <section id="about" class="page py-24 bg-brand-card min-h-screen flex items-center">
             <div class="container mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
                 <div class="reveal">
                     <h2 class="font-serif text-3xl md:text-4xl font-bold mb-6 text-brand-heading">Our Legacy in Time</h2>
@@ -259,7 +320,7 @@
         </section>
 
         <!-- Contact Section -->
-        <section id="contact" class="page py-24 bg-brand-card min-h-screen flex items-center">
+        <section id="contact" class="page py-24 bg-brand-bg min-h-screen flex items-center">
             <div class="container mx-auto px-6">
                 <div class="text-center pt-16 mb-12">
                     <h2 class="font-serif text-3xl md:text-4xl font-bold mb-4 text-brand-heading reveal">Contact Us</h2>
@@ -307,40 +368,86 @@
     </footer>
 
     <script>
-        // --- Three.js 3D Abstract Shape ---
+        // --- Preloader ---
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            preloader.style.opacity = '0';
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 500);
+        });
+
+        // --- Three.js 3D Watch Model ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('hero-canvas'), alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
         // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
-        const pointLight = new THREE.PointLight(0xfde047, 1.5, 100);
-        pointLight.position.set(10, 10, 10);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+        const pointLight = new THREE.PointLight(0xfde047, 0.8, 100);
+        pointLight.position.set(-10, -5, -5);
         scene.add(pointLight);
-        const pointLight2 = new THREE.PointLight(0xffffff, 0.5, 100);
-        pointLight2.position.set(-10, -10, 5);
-        scene.add(pointLight2);
 
-        // Abstract Shape (Icosahedron)
-        const geometry = new THREE.IcosahedronGeometry(1.5, 0);
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0xca8a04, 
-            metalness: 0.7, 
-            roughness: 0.3,
-            flatShading: true
+        // Watch Model
+        const watchGroup = new THREE.Group();
+        const caseMaterial = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, metalness: 0.9, roughness: 0.2 });
+        const goldMaterial = new THREE.MeshStandardMaterial({ color: 0xca8a04, metalness: 1.0, roughness: 0.3 });
+        const screenMaterial = new THREE.MeshBasicMaterial({ color: 0x0a0a0a });
+        
+        const caseGeo = new THREE.CylinderGeometry(1, 1, 0.3, 64);
+        const watchCase = new THREE.Mesh(caseGeo, caseMaterial);
+        watchGroup.add(watchCase);
+
+        const bezelGeo = new THREE.TorusGeometry(1, 0.05, 16, 100);
+        const bezel = new THREE.Mesh(bezelGeo, goldMaterial);
+        bezel.rotation.x = Math.PI / 2;
+        bezel.position.z = 0.15;
+        watchGroup.add(bezel);
+        const bezel2 = bezel.clone();
+        bezel2.position.z = -0.15;
+        watchGroup.add(bezel2);
+
+        const screenGeo = new THREE.CircleGeometry(0.9, 64);
+        const screen = new THREE.Mesh(screenGeo, screenMaterial);
+        screen.position.z = 0.151;
+        watchGroup.add(screen);
+
+        const crownGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.1, 32);
+        const crown = new THREE.Mesh(crownGeo, goldMaterial);
+        crown.position.x = 1.05;
+        crown.rotation.z = Math.PI / 2;
+        watchGroup.add(crown);
+
+        scene.add(watchGroup);
+        camera.position.z = 4;
+
+        // Mouse Interaction
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
         });
-        const shape = new THREE.Mesh(geometry, material);
-        scene.add(shape);
-        camera.position.z = 5;
 
         // Animation Loop
+        const clock = new THREE.Clock();
         function animate() {
-            requestAnimationFrame(animate);
-            shape.rotation.y += 0.002;
-            shape.rotation.x += 0.002;
+            const elapsedTime = clock.getElapsedTime();
+            watchGroup.rotation.y = .5 * elapsedTime;
+            watchGroup.rotation.x = .3 * elapsedTime;
+
+            // Mouse follow effect
+            camera.position.x += (mouseX * 2 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 2 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
             renderer.render(scene, camera);
+            requestAnimationFrame(animate);
         }
         animate();
 
@@ -349,6 +456,7 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         });
 
         // --- Page Navigation Logic ---
